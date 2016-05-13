@@ -1,5 +1,7 @@
 # sdep
 
+[![Build Status](https://travis-ci.org/mattjmcnaughton/sdep.svg)](https://travis-ci.org/sdep/mattjmcnaughton)
+
 **In Progress**
 
 A lightweight tool for continuously deploying static websites using Amazon S3,
