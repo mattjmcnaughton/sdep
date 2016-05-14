@@ -6,7 +6,7 @@ sdep is a cli for easily deploying a static website using Amazon Web
 Services, Cloudfront, and Route 53.
 """
 
-from distutils.core import setup
+from setuptools import setup
 
 VERSION = '0.1'
 
@@ -21,5 +21,9 @@ setup(
     url='https://github.com/mattjmcnaughton/sdep',
     # Make sure to tag releases appropriately.
     download_url="https://github.com/mattjmcnaughton/sdep/tarball/{0}".format(VERSION),
-    keywords=['deployments', 'cli']
+    keywords=['deployments', 'cli'],
+    # Dependencies for `sdep`.
+    install_requires=[
+        'click>=6.0'
+    ]
 )
