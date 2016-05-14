@@ -1,6 +1,7 @@
 # sdep
 
 [![Build Status](https://travis-ci.org/mattjmcnaughton/sdep.svg)](https://travis-ci.org/sdep/mattjmcnaughton)
+[![Documentation Status](https://readthedocs.org/projects/sdep/badge/?version=latest)](http://sdep.readthedocs.io/en/latest/?badge=latest)
 
 **In Progress**
 
