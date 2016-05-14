@@ -13,6 +13,10 @@ DOCKER_RUN:=docker run -it --rm -v $(shell pwd):/sdep mattjmcnaughton/sdep-dev
 build_docker:
 	docker build -t $(DOCKER_IMAGE) .
 
+# Start a bash shell in the docker container in which to execute commands.
+exec:
+	$(DOCKER_RUN) /bin/bash
+
 # Test the application.
 local_test:
 	nose2
