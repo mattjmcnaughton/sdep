@@ -6,3 +6,4 @@ pylint>=1.0
 nose2<=1.0
 sphinx>=1.0
 sphinx-autobuild<=1.0
+sphinxcontrib-napoleon<=1.0
