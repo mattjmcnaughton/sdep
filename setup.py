@@ -24,6 +24,7 @@ setup(
     keywords=['deployments', 'cli'],
     # Dependencies for `sdep`.
     install_requires=[
-        'click>=6.0'
+        'click>=6.0',
+        'simplejson>=3.0'
     ]
 )
