@@ -6,12 +6,11 @@
 Welcome to sdep's documentation!
 ================================
 
-Contents:
+.. include:: contents.rst.inc
 
-.. toctree::
-   :maxdepth: 2
-
-
+.. automodule:: sdep
+   :members:
+   :inherited-members:
 
 Indices and tables
 ==================

@@ -6,6 +6,8 @@ MAINTAINER mattjmcnaughton@gmail.com
 ADD . /sdep
 WORKDIR /sdep
 
-# Update pip and download the development dependencies.
+# Update pip, download the development dependencies, and download the `sdep`
+# dependencies.
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+RUN python setup.py develop
