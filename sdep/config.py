@@ -56,10 +56,14 @@ class Config(object):
     DEFAULT_CONFIG_FILE_NAME = ".sdeprc"
 
     def __init__(self, config_file=None):
+        # @TODO I wonder if it would make more sense for the `Config` class to
+        # inherit from `Hash`, and then we wouldn't need to define
+        # `self._config_hash` or `self.get`. However, I'm a little worried about
+        # having to deal with all of the extra methods that come with a `Hash`.
         self._config_hash = {}
 
         if config_file is None or not os.path.isfile(config_file):
-            config_file = self._locate_config_file()
+            config_file = self.locate_config_file()
         else:
             config_file = os.path.join(os.getcwd(), config_file)
 
@@ -87,7 +91,7 @@ class Config(object):
         return self._config_hash.get(field)
 
     @classmethod
-    def _locate_config_file(cls):
+    def locate_config_file(cls):
         """
         Determine if a configuration file exists either in the current directory
         or the home directory.
@@ -115,13 +119,13 @@ class Config(object):
             ConfigImproperFormatError: If vital configuration data is either in
                 the incorrect format or nonexistent.
         """
-        for field in self._required_config_fields(env=True):
+        for field in self.required_config_fields(env=True):
             value = os.environ.get(field)
 
             if value is None:
                 raise ConfigImproperFormatError
             else:
-                self._config_hash[value.lower()] = value
+                self._config_hash[field.lower()] = value
 
     def _parse_from_config_file(self, config_file):
         """
@@ -135,26 +139,26 @@ class Config(object):
             ConfigImproperFormatError: If vital configuration data is either in
                 the incorrect format or nonexistent.
         """
-        config_data = None
+        config_data = {}
 
         try:
             with open(config_file) as json_file:
                 config_data = json.loads(json_file.read())
-        except (IOError, json.JSONDecodeError) as err:
-            raise ConfigImproperFormatError(err.message)
+        except (IOError, json.JSONDecodeError):
+            raise ConfigImproperFormatError
 
         # @TODO Should a common helper method implement this functionality
         # for both `_parse_from_config_file` and `_parse_from_env`.
-        for field in self._required_config_fields(env=False):
+        for field in self.required_config_fields(env=False):
             value = config_data.get(field)
 
             if value is None:
                 raise ConfigImproperFormatError
             else:
-                self._config_hash[value.lower()] = value
+                self._config_hash[field.lower()] = value
 
     @staticmethod
-    def _required_config_fields(env=False):
+    def required_config_fields(env=False):
         """
         Return the required configuration fields either in `snake_case` or in all
         upper-case `snake_case`, depending on whether the `env` flag is set.
