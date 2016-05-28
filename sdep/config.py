@@ -41,6 +41,11 @@ class Config(object):
             generate the config. If no configuration file is given, then we look
             in the directory from which we are running `sdep` and then the
             user's home directory.
+        test_mode(Optional[bool]): A flag indicating whether we should
+            prepopulate this `Config` instance with a working default
+            configuration. This field should only be used in testing, when we
+            wish to create an instance of `Sdep`, but do not want to create a
+            custom config in a file or environment variables.
 
     Returns:
         config: An instance of the `Config` class, filled in with all values
@@ -55,26 +60,35 @@ class Config(object):
     # Unless otherwise specified, we assume the config file is named `.sdeprc`.
     DEFAULT_CONFIG_FILE_NAME = ".sdeprc"
 
-    def __init__(self, config_file=None):
+    # Constant names for fields.
+    AWS_ACCESS_KEY_ID_FIELD = "aws_access_key_id"
+    AWS_SECRET_ACCESS_KEY_FIELD = "aws_secret_access_key"
+    SITE_DIR_FIELD = "site_dir"
+    DOMAIN_FIELD = "domain"
+
+    def __init__(self, config_file=None, test_mode=False):
         # @TODO I wonder if it would make more sense for the `Config` class to
         # inherit from `Hash`, and then we wouldn't need to define
         # `self._config_hash` or `self.get`. However, I'm a little worried about
         # having to deal with all of the extra methods that come with a `Hash`.
         self._config_hash = {}
 
-        if config_file is None or not os.path.isfile(config_file):
-            config_file = self.locate_config_file()
+        if test_mode:
+            self._prepopulate_config()
         else:
-            config_file = os.path.join(os.getcwd(), config_file)
-
-        try:
-            if config_file is None:
-                self._parse_from_env()
+            if config_file is None or not os.path.isfile(config_file):
+                config_file = self.locate_config_file()
             else:
-                self._parse_from_config_file(config_file)
+                config_file = os.path.join(os.getcwd(), config_file)
 
-        except (ConfigFileDoesNotExistError, ConfigImproperFormatError):
-            raise ConfigParseError
+            try:
+                if config_file is None:
+                    self._parse_from_env()
+                else:
+                    self._parse_from_config_file(config_file)
+
+            except (ConfigFileDoesNotExistError, ConfigImproperFormatError):
+                raise ConfigParseError
 
     def get(self, field):
         """
@@ -89,6 +103,17 @@ class Config(object):
             specified configuration.
         """
         return self._config_hash.get(field)
+
+    def put(self, field, value):
+        """
+        Insert a `value` for the specified configuration `field`. If the given
+        `field` already has a value, we will overwrite it with `value`.
+
+        Args:
+            field (str): The configuration field.
+            value (object): The value for said field.
+        """
+        self._config_hash[field] = value
 
     @classmethod
     def locate_config_file(cls):
@@ -157,8 +182,8 @@ class Config(object):
             else:
                 self._config_hash[field.lower()] = value
 
-    @staticmethod
-    def required_config_fields(env=False):
+    @classmethod
+    def required_config_fields(cls, env=False):
         """
         Return the required configuration fields either in `snake_case` or in all
         upper-case `snake_case`, depending on whether the `env` flag is set.
@@ -171,7 +196,10 @@ class Config(object):
             [str]: A list of required configuration fields.
         """
         required_fields = [
-            "aws_access_key_id", "aws_secret_access_key", "site_dir"
+            cls.AWS_ACCESS_KEY_ID_FIELD,
+            cls.AWS_SECRET_ACCESS_KEY_FIELD,
+            cls.SITE_DIR_FIELD,
+            cls.DOMAIN_FIELD
         ]
 
         if env:
@@ -180,7 +208,7 @@ class Config(object):
             return required_fields
 
     @staticmethod
-    def _optional_config_fields(env=False):
+    def optional_config_fields(env=False):
         """
         Return the optinal configuration fields either in `snake_case` or in all
         upper-case `snake_case`, depending on whether the `env` flag is set.
@@ -198,3 +226,17 @@ class Config(object):
             return [field.upper() for field in optional_fields]
         else:
             return optional_fields
+
+    def _prepopulate_config(self):
+        """
+        Prepopulate this instance of `Config` with sensible default values which
+        we can use when testing.
+        """
+        # @TODO Determine a better method for automatically including all
+        # `required` variables.
+        self._config_hash = {
+            self.AWS_ACCESS_KEY_ID_FIELD: "MY_ACCESS_KEY",
+            self.AWS_SECRET_ACCESS_KEY_FIELD: "MY_SECRET_KEY",
+            self.SITE_DIR_FIELD: "./static",
+            self.DOMAIN_FIELD: "sdep-test.com"
+        }

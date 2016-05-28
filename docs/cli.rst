@@ -57,6 +57,7 @@ options can be set in configuration files:
   account.
 - :command:`AWS_SECRET_ACCESS_KEY`: The secret key for one's AWS account.
 - :command:`SITE_DIR`: The root directory of the static site.
+- :command:`DOMAIN`: The domain name.
 
 **Optional**
 
@@ -72,8 +73,8 @@ An example of running :command:`update` using environment variables for
 configuration is the following::
 
     export AWS_ACCESS_KEY_ID=MY_ACCESS_KEY_ID; export
-    AWS_SECRET_ACCESS_KEY=MY_SECRET_ACCESS_KEY; export SITE_DIR=./static; sdep
-    update
+    AWS_SECRET_ACCESS_KEY=MY_SECRET_ACCESS_KEY; export SITE_DIR=./static;
+    export DOMAIN=sdep-example.com; sdep update
 
 Configuration File
 ~~~~~~~~~~~~~~~~~~~
@@ -83,9 +84,10 @@ configuration values. A :command:`.sdeprc` file is just a simple JSON file, as
 con be seen below::
 
     {
-      aws_access_key_id: "MY_ACCESS_KEY_ID",
-      aws_secret_access_key: "MY_SECRET_ACCESS_KEY",
-      site_dir: "./static"
+      "aws_access_key_id": "MY_ACCESS_KEY_ID",
+      "aws_secret_access_key": "MY_SECRET_ACCESS_KEY",
+      "site_dir": "./static",
+      "domain": "sdep-example.com"
     }
 
 There are three possible ways to specify the location of a :command:`.sdeprc`.
