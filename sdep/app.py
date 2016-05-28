@@ -82,6 +82,17 @@ class Sdep(object):
         self.upload_files_to_s3()
         self.configure_bucket_as_website()
 
+    def update(self):
+        """
+        Update the static website on AWS. This will perform the following
+        actions:
+        - Update static files that have changed.
+        """
+        # Because s3 uses the same operations for `create` and `updating` an
+        # object on s3, we can just reuse the same function.
+        # @TODO In the future, we should only update the files that changed.
+        self.upload_files_to_s3()
+
     def create_s3_buckets(self):
         """
         Create the buckets in which we will place the static content.
@@ -196,11 +207,3 @@ class Sdep(object):
         }
 
         return website_config
-
-    def update(self):
-        """
-        Update the static website on AWS. This will perform the following
-        actions:
-        - Update static files that have changed.
-        """
-        pass

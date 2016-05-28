@@ -44,6 +44,14 @@ class SdepTestCase(unittest.TestCase):
         pass
 
     @mock_s3
+    def test_upload(self):
+        """
+        Like `test_create`, we do not test the `upload` method because we test
+        the individual components.
+        """
+        pass
+
+    @mock_s3
     def test_create_s3_buckets(self):
         """
         Test that creating s3 buckets works successfully.
