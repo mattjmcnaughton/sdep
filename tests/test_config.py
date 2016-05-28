@@ -35,7 +35,7 @@ class ConfigTestCase(unittest.TestCase):
         for field in Config.required_config_fields():
             self.assertNotEqual(config.get(field), None)
 
-        self._cleanup_file(config_file)
+        os.remove(config_file)
 
     def test_load_config_from_env(self):
         """
@@ -67,7 +67,7 @@ class ConfigTestCase(unittest.TestCase):
         self.assertNotEqual(Config.locate_config_file(), None)
 
         if created_file:
-            self._cleanup_file(curr_dir_loc)
+            os.remove(curr_dir_loc)
 
     def test_find_config_in_home_dir(self):
         """
@@ -88,7 +88,7 @@ class ConfigTestCase(unittest.TestCase):
         self.assertNotEqual(Config.locate_config_file(), None)
 
         if created_file:
-            self._cleanup_file(home_dir_loc)
+            os.remove(home_dir_loc)
 
     def test_bad_config(self):
         """
@@ -146,13 +146,3 @@ class ConfigTestCase(unittest.TestCase):
             bad_config_file.write(json.dumps({}))
 
         return file_name
-
-    @staticmethod
-    def _cleanup_file(file_path):
-        """
-        Delete the temporary configuration file we created.
-
-        Args:
-            file_path (str): The path to the file we wish to delete.
-        """
-        os.remove(file_path)
