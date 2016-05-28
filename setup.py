@@ -8,11 +8,11 @@ Services, Cloudfront, and Route 53.
 
 from setuptools import setup
 
-VERSION = '0.1'
+VERSION = '0.11'
 
 setup(
     name='sdep',
-    # Automatically read the version from `sdep/__init__.py`.
+    # @TODO Automatically read the version from `sdep/__init__.py`.
     version=VERSION,
     description='A cli for easily deploying static websites',
     author='Matt McNaughton',
