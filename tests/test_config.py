@@ -5,9 +5,12 @@ Tests for the `config`.
 # pylint: disable=import-error
 
 import os
+import shutil
 import tempfile
 import unittest
 import uuid
+
+from collections import namedtuple
 
 import simplejson as json
 
@@ -18,11 +21,11 @@ from sdep.config import Config, ConfigParseError
 class ConfigTestCase(unittest.TestCase):
     """
     Test cases for the `Config` class.
-
-    @TODO Overall it would be a big improvement to isolate the file system
-    because right now tests may pass/fail based on the location of configuration
-    files on users local file systems.
     """
+
+    # MockDirs is a helper named tuple making it easier to return the temporary
+    # dirs with which we will mock `current` and `home` dir.
+    MockDirs = namedtuple("MockDirs", "current home")
 
     def test_load_config_from_file(self):
         """
@@ -57,17 +60,22 @@ class ConfigTestCase(unittest.TestCase):
         specified in the command line, but rather located in the curr directory
         from which the tests are run.
         """
-        curr_dir_loc = os.path.join(os.getcwd(), Config.DEFAULT_CONFIG_FILE_NAME)
-        created_file = False
+        temp_dirs = self._create_mock_dirs()
 
-        if not os.path.isfile(curr_dir_loc):
-            created_file = True
-            self._create_config_file(file_name=curr_dir_loc)
+        with patch('os.getcwd', return_value=temp_dirs.current):
+            with patch('os.path.expanduser', return_value=temp_dirs.home):
+                config_in_curr = os.path.join(os.getcwd(),
+                                              Config.DEFAULT_CONFIG_FILE_NAME)
+                self._create_config_file(config_in_curr)
 
-        self.assertNotEqual(Config.locate_config_file(), None)
+                config = Config()
 
-        if created_file:
-            os.remove(curr_dir_loc)
+                self.assertEqual(config_in_curr, Config.locate_config_file())
+                for field in Config.required_config_fields():
+                    self.assertNotEqual(config.get(field), None)
+
+        for temp_dir in [temp_dirs.current, temp_dirs.home]:
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
     def test_find_config_in_home_dir(self):
         """
@@ -75,20 +83,26 @@ class ConfigTestCase(unittest.TestCase):
         specified in the command line, but rather located in the users home
         dir.
         """
-        # @TODO Is there too much code duplication between this method and
-        # `test_find_config_in_curr_dir`?
+        # @TODO Is there too much overlap between this method and
+        # `test_find_config_in_home_dir`?
 
-        home_dir_loc = os.path.join(os.path.expanduser("~"), Config.DEFAULT_CONFIG_FILE_NAME)
-        created_file = False
+        temp_dirs = self._create_mock_dirs()
 
-        if not os.path.isfile(home_dir_loc):
-            created_file = True
-            self._create_config_file(file_name=home_dir_loc)
+        with patch('os.getcwd', return_value=temp_dirs.current):
+            with patch('os.path.expanduser', return_value=temp_dirs.home):
+                config_in_home = os.path.join(os.path.expanduser("~"),
+                                              Config.DEFAULT_CONFIG_FILE_NAME)
+                self._create_config_file(config_in_home)
 
-        self.assertNotEqual(Config.locate_config_file(), None)
+                config = Config()
 
-        if created_file:
-            os.remove(home_dir_loc)
+                self.assertEqual(config_in_home, Config.locate_config_file())
+                for field in Config.required_config_fields():
+                    self.assertNotEqual(config.get(field), None)
+
+        for temp_dir in [temp_dirs.current, temp_dirs.home]:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
 
     def test_bad_config(self):
         """
@@ -109,6 +123,22 @@ class ConfigTestCase(unittest.TestCase):
             dict: A properly formatted config.
         """
         return {field: str(uuid.uuid4()) for field in Config.required_config_fields()}
+
+    @classmethod
+    def _create_mock_dirs(cls):
+        """
+        A helper method to create two separate temporary directories which we
+        will use to mock the current and home directory respectively. Using this
+        method, in conjunction with mocking, allows us to completely isolate our
+        test suite from the user's local filesystem.
+
+        Returns:
+            MockDirs: The locations of the mock directories.
+        """
+        temp_current = tempfile.mkdtemp()
+        temp_home = tempfile.mkdtemp()
+
+        return cls.MockDirs(current=temp_current, home=temp_home)
 
     def _create_config_file(self, file_name=None):
         """
