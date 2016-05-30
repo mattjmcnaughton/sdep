@@ -65,6 +65,10 @@ def cli(action, config, test):
             elif action == Actions.UPDATE:
                 sdep.update()
 
-if __name__ == '__main__':
+def main():
+    """
+    The `main` function will be run when we execute `$ sdep create...` from the
+    terminal.
+    """
     # pylint: disable=no-value-for-parameter
     cli()

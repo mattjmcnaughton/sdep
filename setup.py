@@ -27,5 +27,12 @@ setup(
         'boto3>=1.0.0',
         'click>=6.0',
         'simplejson>=3.0',
-    ]
+    ],
+    # Install `sdep` to the user's site-packages directory.
+    packages=["sdep"],
+    # Tell pip to generate a script called `sdep` which will invoke
+    # `sdep.cli:main`.
+    entry_points={
+        "console_scripts": ["sdep = sdep.cli:main"]
+    }
 )
