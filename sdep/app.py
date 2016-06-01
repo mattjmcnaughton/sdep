@@ -28,12 +28,6 @@ class Sdep(object):
     # Constant names of AWS objects.
     BUCKET_NAME = "bucket_name"
 
-    # Default index and error.
-    # @TODO This specification is temporary, as eventually we will make these
-    # configurable options with `Config`.
-    DEFAULT_INDEX_SUFFIX = "index.html"
-    DEFAULT_ERROR_KEY = "404.html"
-
     def __init__(self, config):
         self._config = config
         self._s3_client = self._establish_s3_client()
@@ -199,10 +193,10 @@ class Sdep(object):
         """
         website_config = {
             "IndexDocument": {
-                "Suffix": self.DEFAULT_INDEX_SUFFIX
+                "Suffix": self._config.get(Config.INDEX_SUFFIX_FIELD)
             },
             "ErrorDocument": {
-                "Key": self.DEFAULT_ERROR_KEY
+                "Key": self._config.get(Config.ERROR_KEY_FIELD)
             }
         }
 

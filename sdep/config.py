@@ -65,6 +65,8 @@ class Config(object):
     AWS_SECRET_ACCESS_KEY_FIELD = "aws_secret_access_key"
     SITE_DIR_FIELD = "site_dir"
     DOMAIN_FIELD = "domain"
+    INDEX_SUFFIX_FIELD = "index_suffix"
+    ERROR_KEY_FIELD = "error_key"
 
     def __init__(self, config_file=None, test_mode=False):
         # @TODO I wonder if it would make more sense for the `Config` class to
@@ -176,8 +178,8 @@ class Config(object):
             config_data
         )
 
-    @staticmethod
-    def _parse_from_store(required_fields, optional_fields, data_store):
+    @classmethod
+    def _parse_from_store(cls, required_fields, optional_fields, data_store):
         """
         Parse the configuration from a data store object (i.e. the json hash or
         `os.environ`). This method is useful because the process for parsing the
@@ -194,15 +196,18 @@ class Config(object):
         Returns:
             dict: A configuration dictionary.
         """
-        config_hash = {}
+        # Start with all of the defaults filled in. We will overwrite with any
+        # specified info.
+        config_hash = cls._optional_fields_and_defaults()
 
         fields = [(f, True) for f in required_fields] + [(f, False) for f in optional_fields]
 
         for field, required in fields:
             value = data_store.get(field)
 
-            if value is None and required:
-                raise ConfigImproperFormatError
+            if value is None:
+                if required:
+                    raise ConfigImproperFormatError
             else:
                 config_hash[field.lower()] = value
 
@@ -233,8 +238,8 @@ class Config(object):
         else:
             return required_fields
 
-    @staticmethod
-    def optional_config_fields(env=False):
+    @classmethod
+    def optional_config_fields(cls, env=False):
         """
         Return the optinal configuration fields either in `snake_case` or in all
         upper-case `snake_case`, depending on whether the `env` flag is set.
@@ -246,23 +251,40 @@ class Config(object):
         Returns:
             [str]: A list of optional configuration fields.
         """
-        optional_fields = []
+        optional_fields = list(cls._optional_fields_and_defaults().keys())
 
         if env:
             return [field.upper() for field in optional_fields]
         else:
             return optional_fields
 
+    @classmethod
+    def _optional_fields_and_defaults(cls):
+        """
+        Return a dictionary of optional fields and their defaults.
+
+        Returns:
+            dict: Optional fields and their defaults.
+        """
+        return {
+            cls.INDEX_SUFFIX_FIELD: "index.html",
+            cls.ERROR_KEY_FIELD: "404.html"
+        }
+
     def _prepopulate_config(self):
         """
         Prepopulate this instance of `Config` with sensible default values which
         we can use when testing.
         """
-        # @TODO Determine a better method for automatically including all
-        # `required` variables.
-        self._config_hash = {
+        populate_hash = {
             self.AWS_ACCESS_KEY_ID_FIELD: "MY_ACCESS_KEY",
             self.AWS_SECRET_ACCESS_KEY_FIELD: "MY_SECRET_KEY",
             self.SITE_DIR_FIELD: "./static",
             self.DOMAIN_FIELD: "sdep-test.com"
         }
+
+        self._config_hash = self._parse_from_store(
+            self.required_config_fields(env=False),
+            self.optional_config_fields(env=False),
+            populate_hash
+        )

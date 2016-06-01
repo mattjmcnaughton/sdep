@@ -117,9 +117,8 @@ class SdepTestCase(unittest.TestCase):
         # with `Config`.
         resp = self._s3_client.get_bucket_website(Bucket=bucket_name)
 
-        self.assertEqual(resp["IndexDocument"]["Suffix"],
-                         Sdep.DEFAULT_INDEX_SUFFIX)
-        self.assertEqual(resp["ErrorDocument"]["Key"], Sdep.DEFAULT_ERROR_KEY)
+        self.assertNotEqual(resp["IndexDocument"]["Suffix"], None)
+        self.assertNotEqual(resp["ErrorDocument"]["Key"], None)
 
     @classmethod
     def _create_test_upload_dir(cls):
