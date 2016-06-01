@@ -35,7 +35,7 @@ class ConfigTestCase(unittest.TestCase):
         config_file = self._create_config_file()
         config = Config(config_file=config_file)
 
-        for field in Config.required_config_fields():
+        for field in self._all_fields():
             self.assertNotEqual(config.get(field), None)
 
         os.remove(config_file)
@@ -51,7 +51,7 @@ class ConfigTestCase(unittest.TestCase):
         with patch.dict(os.environ, environ_dict, clear=True):
             config = Config()
 
-            for field in Config.required_config_fields():
+            for field in self._all_fields():
                 self.assertNotEqual(config.get(field), None)
 
     def test_find_config_in_curr_dir(self):
@@ -71,7 +71,7 @@ class ConfigTestCase(unittest.TestCase):
                 config = Config()
 
                 self.assertEqual(config_in_curr, Config.locate_config_file())
-                for field in Config.required_config_fields():
+                for field in self._all_fields():
                     self.assertNotEqual(config.get(field), None)
 
         for temp_dir in [temp_dirs.current, temp_dirs.home]:
@@ -97,12 +97,11 @@ class ConfigTestCase(unittest.TestCase):
                 config = Config()
 
                 self.assertEqual(config_in_home, Config.locate_config_file())
-                for field in Config.required_config_fields():
+                for field in self._all_fields():
                     self.assertNotEqual(config.get(field), None)
 
         for temp_dir in [temp_dirs.current, temp_dirs.home]:
             shutil.rmtree(temp_dir, ignore_errors=True)
-
 
     def test_bad_config(self):
         """
@@ -114,15 +113,23 @@ class ConfigTestCase(unittest.TestCase):
         with self.assertRaises(ConfigParseError):
             Config(config_file=config_file)
 
-    @staticmethod
-    def _config_dict():
+    @classmethod
+    def _config_dict(cls):
         """
         A dictionary of property formatted config.
 
         Returns:
             dict: A properly formatted config.
         """
-        return {field: str(uuid.uuid4()) for field in Config.required_config_fields()}
+        base_dict = {field: str(uuid.uuid4()) for field in cls._all_fields()}
+
+        # Remove one of the optional fields so that we can test the default value
+        # being filled in.
+
+        field_to_remove = Config.optional_config_fields()[0]
+        del base_dict[field_to_remove]
+
+        return base_dict
 
     @classmethod
     def _create_mock_dirs(cls):
@@ -176,3 +183,13 @@ class ConfigTestCase(unittest.TestCase):
             bad_config_file.write(json.dumps({}))
 
         return file_name
+
+    @staticmethod
+    def _all_fields():
+        """
+        Helper method to return all configuration fields.
+
+        Returns:
+            list: List of the strings for all configuration fields.
+        """
+        return Config.required_config_fields() + Config.optional_config_fields()

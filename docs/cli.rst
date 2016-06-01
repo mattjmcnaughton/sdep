@@ -61,6 +61,12 @@ options can be set in configuration files:
 
 **Optional**
 
+- :command:`INDEX_SUFFIX`: When hosting with Amazon S3, it is necessary to
+  specify an index suffix, which is appended to all urls ending in :command:`/`. The
+  default value is :command:`index.html`.
+- :command:`ERROR_KEY`: The S3 key of the file Amazon should serve in case of
+  error (i.e. incorrect url). The default value is :command:`404.html`.
+
 Environment Variables
 ~~~~~~~~~~~~~~~~~~~~~
 
