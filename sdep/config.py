@@ -144,13 +144,11 @@ class Config(object):
             ConfigImproperFormatError: If vital configuration data is either in
                 the incorrect format or nonexistent.
         """
-        for field in self.required_config_fields(env=True):
-            value = os.environ.get(field)
-
-            if value is None:
-                raise ConfigImproperFormatError
-            else:
-                self._config_hash[field.lower()] = value
+        self._config_hash = self._parse_from_store(
+            self.required_config_fields(env=True),
+            self.optional_config_fields(env=True),
+            os.environ
+        )
 
     def _parse_from_config_file(self, config_file):
         """
@@ -172,15 +170,43 @@ class Config(object):
         except (IOError, json.JSONDecodeError):
             raise ConfigImproperFormatError
 
-        # @TODO Should a common helper method implement this functionality
-        # for both `_parse_from_config_file` and `_parse_from_env`.
-        for field in self.required_config_fields(env=False):
-            value = config_data.get(field)
+        self._config_hash = self._parse_from_store(
+            self.required_config_fields(env=False),
+            self.optional_config_fields(env=False),
+            config_data
+        )
 
-            if value is None:
+    @staticmethod
+    def _parse_from_store(required_fields, optional_fields, data_store):
+        """
+        Parse the configuration from a data store object (i.e. the json hash or
+        `os.environ`). This method is useful because the process for parsing the
+        data from either the environment or a configuration file shares many of
+        the same components. Abstracting to a single method ensures less
+        duplicate code.
+
+        Args:
+            required_fields (list): A list of the required fields.
+            optional_fields (list): A list of the optional fields.
+            data_store (dict): A dictionary containing key/value pairs with the
+                fields as a key.
+
+        Returns:
+            dict: A configuration dictionary.
+        """
+        config_hash = {}
+
+        fields = [(f, True) for f in required_fields] + [(f, False) for f in optional_fields]
+
+        for field, required in fields:
+            value = data_store.get(field)
+
+            if value is None and required:
                 raise ConfigImproperFormatError
             else:
-                self._config_hash[field.lower()] = value
+                config_hash[field.lower()] = value
+
+        return config_hash
 
     @classmethod
     def required_config_fields(cls, env=False):
