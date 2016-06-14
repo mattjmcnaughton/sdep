@@ -28,7 +28,7 @@ class Actions(object):
 @click.command()
 @click.argument('action')
 @click.option("--config", help=CONFIG_HELP)
-@click.option("--test/--no-test", help=TEST_HELP, default=True)
+@click.option("--test/--no-test", help=TEST_HELP, default=False)
 def cli(action, config, test):
     """
     This function specifies the command line interface.
