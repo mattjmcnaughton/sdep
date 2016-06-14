@@ -5,6 +5,7 @@ necessary for creating and updating a static website on AWS.
 
 # pylint: disable=import-error
 
+import mimetypes
 import os
 
 import boto3
@@ -31,6 +32,7 @@ class Sdep(object):
     def __init__(self, config):
         self._config = config
         self._s3_client = self._establish_s3_client()
+        self._s3_transfer = self._establish_s3_transfer(self._s3_client)
 
     @property
     def config(self):
@@ -63,6 +65,21 @@ class Sdep(object):
 
         return boto3.client("s3", aws_access_key_id=access_key,
                             aws_secret_access_key=secret_key)
+
+    @staticmethod
+    def _establish_s3_transfer(s3_client):
+        """
+        To upload a file with a specified `ContentType`, which we need to do or
+        else it is assumed that everything is a `binary/octet-stream`, we need
+        to use `boto.s3.transfer.S3Transfer#upload_file` instead of `S3.Client`.
+
+        Args:
+            s3_client (S3.Client): The S3 Client we will use for our connection.
+
+        Returns:
+            boto.s3.transfer.S3Transfer: Our S3Transfer object.
+        """
+        return boto3.s3.transfer.S3Transfer(s3_client)
 
     def create(self):
         """
@@ -121,8 +138,11 @@ class Sdep(object):
                 # `site_dir` as the root. We add `+ 1` to cut off a `/`.
                 key_name = full_path[len(site_dir) + 1:]
 
-                self._s3_client.upload_file(full_path, self._bucket_name(),
-                                            key_name)
+                content_type = self._predict_content_type(key_name)
+
+                self._s3_transfer.upload_file(full_path, self._bucket_name(),
+                                              key_name,
+                                              extra_args={"ContentType": content_type})
 
     def configure_bucket_as_website(self):
         """
@@ -201,3 +221,26 @@ class Sdep(object):
         }
 
         return website_config
+
+    @staticmethod
+    def _predict_content_type(key):
+        """
+        Predict the `ContentType` we upload as part of the keys metadata.
+
+        Args:
+            key (str): The key name.
+
+        Returns:
+            str: The predicted content type (i.e. 'text/html').
+        """
+        # If we do not specify a content-type, s3 assumes everything is
+        # a `binary/octet-stream`.
+        content_type, _ = mimetypes.guess_type(key)
+
+        # @TODO Create a more intelligent way of handling unknown
+        # mimetypes.
+        if content_type is None:
+            if "woff" in key:
+                content_type = "application/font-woff"
+
+        return content_type
