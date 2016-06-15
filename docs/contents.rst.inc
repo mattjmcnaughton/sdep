@@ -8,3 +8,13 @@ with **sdep**.
    :maxdepth: 2
 
    cli
+
+API Reference
+-------------
+
+Information on specific functions, classes, and methods.
+
+.. toctree::
+   :maxdepth: 2
+
+   api
