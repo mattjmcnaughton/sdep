@@ -1,6 +1,6 @@
 """
 This file contains the `Sdep` class as well as any related classes and functions
-necessary for creating and updating a static website on AWS.
+necessary for creating and updating a static website on S3.
 """
 
 # pylint: disable=import-error

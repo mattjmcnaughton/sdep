@@ -2,8 +2,7 @@
 sdep
 ----
 
-sdep is a cli for easily deploying a static website using Amazon Web
-Services, Cloudfront, and Route 53.
+sdep is a cli for easily deploying a static website using S3.
 """
 
 # pylint: disable=invalid-name

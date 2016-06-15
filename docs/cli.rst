@@ -26,7 +26,7 @@ create
 ------
 
 The :command:`create` command should only be run once for each static website.
-It does the initial provisioning of Amazon and any other one time tasks.
+It does the initial provisioning and configuration of S3 and any other one time tasks.
 
 update
 ------

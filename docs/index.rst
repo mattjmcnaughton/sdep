@@ -8,10 +8,6 @@ Welcome to sdep's documentation!
 
 .. include:: contents.rst.inc
 
-.. automodule:: sdep
-   :members:
-   :inherited-members:
-
 Indices and tables
 ==================
 
