@@ -120,6 +120,27 @@ class SdepTestCase(unittest.TestCase):
         self.assertNotEqual(resp["IndexDocument"]["Suffix"], None)
         self.assertNotEqual(resp["ErrorDocument"]["Key"], None)
 
+    def test_predict_content_type(self):
+        """
+        There are some strange edge cases having to do with the setting the
+        `ContentType` metadata for files, so we perform some tests just to make
+        sure our module is working as expected.
+        """
+        poss_keys = [
+            "index.html",
+            "pic.jpg",
+            "style.css",
+            "main.js",
+            "fontawesome/fonts/fontawesome-webfont.eot",
+            "fontawesome/fonts/fontawesome-webfont.woff",
+            "fontawesome/fonts/fontawesome-webfont.woff2",
+            "fontawesome/fonts/FontAwesome.otf",
+            "fontawesome/fonts/fontawesome-webfont.ttf"
+        ]
+
+        for key in poss_keys:
+            self.assertNotEqual(Sdep.predict_content_type(key), None)
+
     @classmethod
     def _create_test_upload_dir(cls):
         """
