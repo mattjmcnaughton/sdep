@@ -138,7 +138,7 @@ class Sdep(object):
                 # `site_dir` as the root. We add `+ 1` to cut off a `/`.
                 key_name = full_path[len(site_dir) + 1:]
 
-                content_type = self._predict_content_type(key_name)
+                content_type = self.predict_content_type(key_name)
 
                 self._s3_transfer.upload_file(full_path, self._bucket_name(),
                                               key_name,
@@ -223,7 +223,7 @@ class Sdep(object):
         return website_config
 
     @staticmethod
-    def _predict_content_type(key):
+    def predict_content_type(key):
         """
         Predict the `ContentType` we upload as part of the keys metadata.
 
@@ -237,10 +237,18 @@ class Sdep(object):
         # a `binary/octet-stream`.
         content_type, _ = mimetypes.guess_type(key)
 
-        # @TODO Create a more intelligent way of handling unknown
-        # mimetypes.
+        unrecognized_mappings = {
+            "eot": "application/vnd.ms-fontobject",
+            "ttf": "application/font-sfnt",
+            "woff": "application/font-woff",
+            "otf": "font/opentype"
+        }
+
         if content_type is None:
-            if "woff" in key:
-                content_type = "application/font-woff"
+            _, file_extension = os.path.splitext(key)
+
+            for extension, poss_type in unrecognized_mappings.items():
+                if extension in file_extension:
+                    content_type = poss_type
 
         return content_type
