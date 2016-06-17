@@ -135,7 +135,11 @@ class SdepTestCase(unittest.TestCase):
             "fontawesome/fonts/fontawesome-webfont.woff",
             "fontawesome/fonts/fontawesome-webfont.woff2",
             "fontawesome/fonts/FontAwesome.otf",
-            "fontawesome/fonts/fontawesome-webfont.ttf"
+            "fontawesome/fonts/fontawesome-webfont.ttf",
+            "test/style.scss",
+            "test/style.sass",
+            "test/test.htc",
+            "test/test.nomatch"
         ]
 
         for key in poss_keys:

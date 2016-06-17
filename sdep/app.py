@@ -241,7 +241,10 @@ class Sdep(object):
             "eot": "application/vnd.ms-fontobject",
             "ttf": "application/font-sfnt",
             "woff": "application/font-woff",
-            "otf": "font/opentype"
+            "otf": "font/opentype",
+            "scss": "text/css",
+            "sass": "text/css",
+            "htc": "text/x-component"
         }
 
         if content_type is None:
@@ -251,4 +254,7 @@ class Sdep(object):
                 if extension in file_extension:
                     content_type = poss_type
 
-        return content_type
+        # The content type to return if we unable to match.
+        default_content_type = "text/plain"
+
+        return content_type or default_content_type
