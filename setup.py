@@ -7,6 +7,7 @@ sdep is a cli for easily deploying a static website using S3.
 
 # pylint: disable=invalid-name
 
+import ast
 import re
 
 from setuptools import setup
@@ -15,7 +16,7 @@ from setuptools import setup
 with open("sdep/__init__.py", "rb") as init_file:
     file_contents = init_file.read().decode("utf-8")
     version_re = re.compile(r"__version__\s+=\s+(.*)")
-    version = version_re.search(file_contents).group(1)
+    version = str(ast.literal_eval(version_re.search(file_contents).group(1)))
 
 setup(
     name="sdep",
