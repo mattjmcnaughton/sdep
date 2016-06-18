@@ -3,7 +3,7 @@
 Command Line Interface
 ======================
 
-.. versionadded:: 0.1
+.. versionadded:: 0.1.0
 
 The primary method of running **sdep** is through the command line interface. We use
 `click <http://click.pocoo.org/>`_ to easily create a command line interface. It

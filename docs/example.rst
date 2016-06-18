@@ -3,7 +3,7 @@
 Quickstart Example
 ==================
 
-.. versionadded:: 0.3
+.. versionadded:: 0.1.0
 
 The following example demonstrates using **sdep** to create a static website. In
 addition to **sdep**, and Amazon S3, we utilize `travis-ci
@@ -112,7 +112,7 @@ a :command:`.travis.yml` file with the following contents::
     sudo: required
     script:
     - hugo -v
-    - sudo pip install sdep>=0.30
+    - sudo pip install sdep>=0.1.0
     - sdep update
     branches:
       only:
